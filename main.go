@@ -26,8 +26,13 @@ func (t *templateHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
+	// チャットルーム作成
+	r := newRoom()
 	// テンプレ設定
 	http.Handle("/", &templateHandler{filename: "chat.html"})
+	http.Handle("/room", r)
+	// チャットルーム開始
+	go r.run()
 
 	/*http.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte(`
@@ -46,5 +51,5 @@ func main() {
 	if err := http.ListenAndServe(":8080", nil); err != nil {
 		log.Fatal("ListenAndServe:", err)
 	}
-
+	log.Println("webサーバー起動完了")
 }

@@ -1,8 +1,55 @@
 <html>
   <head>
   <title>chat!</title>
+  <style>
+  input {display: block;}
+  ul {list-style: none;}
+  </style>
   </head>
   <body>
-  チャットしようぜ！お前chatサーバーな！
+    <ul id="messages"></ul>
+    チャットしようぜ！お前chatサーバーな！
+  <form id="chatbox">
+    <textarea></textarea>
+    <input type="submit" value="そうしん" />
+  </form>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js" >
+  </script>
+  <script>
+    $(function(){
+      var socket = null;
+      var msgbox = $("#chatbox textarea");
+      var messages = $("#messages");
+      $("#chatbox").submit(function(){
+        console.log("submit");
+        if(!msgbox.val()) {
+          console.log("msgbox empty");
+          return false;
+        }
+        if (!socket) {
+          alert("エラー：WebSocket接続が行われていないっす");
+          return false;
+        }
+        console.log("そうしんないよう：" + msgbox.val());
+        socket.send(msgbox.val());
+        msgbox.val("");
+        return false;
+      });
+
+      if (!window["WebSocket"]) {
+        alert("エラー：WebSocketに対応していないブラウザです");
+      } else {
+        console.log("webSocket");
+        socket = new WebSocket("ws://localhost:8080/room");
+        console.log(socket);
+        socket.onclose = function() {
+          alert("接続が終了しました。。。");
+        }
+        socket.onmessage = function(e) {
+          messages.append($("<li>").text(e.data));
+        }
+      }
+    });
+  </script>
   </body>
 </html>
