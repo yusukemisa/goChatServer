@@ -41,7 +41,7 @@ func main() {
 	gom.WithProviders(
 		facebook.New("クライアントID", "secretKey", "http://localhost:8080/auth/callback/facebook"),
 		github.New("クライアントID", "secretKey", "http://localhost:8080/auth/callback/github"),
-		google.New("xxxxxxxxxx-yyyyyyyy.apps.googleusercontent.com", "secret", "http://localhost:8080/auth/callback/google"),
+		google.New("xxxxxxxxxx.apps.googleusercontent.com", "secret", "http://localhost:8080/auth/callback/google"),
 	)
 	// チャットルーム作成
 	r := newRoom()
