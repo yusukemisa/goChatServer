@@ -6,6 +6,8 @@ import (
 	"net/http"
 	"strings"
 
+	"github.com/stretchr/objx"
+
 	gom "github.com/stretchr/gomniauth"
 )
 
@@ -41,6 +43,36 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 	action := segs[2]
 	provider := segs[3]
 	switch action {
+	case "callback":
+		// ユーザーがアクセス許可後に認証プロバイダーがリダイレクトする際
+		// URLにはcallbackというアクション名が含まれる
+		provider, err := gom.Provider(provider)
+		if err != nil {
+			log.Fatalln("認証プロバイダーの取得に失敗しました:", provider, "-", err)
+		}
+
+		// 認証が成功するとユーザー情報にアクセスするための認証情報が取得できる
+		log.Println("provider:", provider.Name())
+		log.Println("URL:", r.URL.RawQuery)
+		creds, err := provider.CompleteAuth(objx.MustFromURLQuery(r.URL.RawQuery))
+		if err != nil {
+			log.Fatalln("認証を完了できませんでした:", provider, "-", err)
+		}
+		user, err := provider.GetUser(creds)
+		if err != nil {
+			log.Fatalln("ユーザーの取得に失敗しました:", provider, "-", err)
+		}
+		// 取得できたユーザー情報のNameをBase64でエンコしクッキーに保持
+		authCookieValue := objx.New(map[string]interface{}{
+			"name": user.Name(),
+		}).MustBase64()
+		http.SetCookie(w, &http.Cookie{
+			Name:  "auth",
+			Value: authCookieValue,
+			Path:  "/",
+		})
+		w.Header()["Location"] = []string{"/chat"}
+		w.WriteHeader(http.StatusTemporaryRedirect)
 	case "login":
 		provider, err := gom.Provider(provider)
 		if err != nil {
