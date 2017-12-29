@@ -50,10 +50,7 @@ func loginHandler(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			log.Fatalln("認証プロバイダーの取得に失敗しました:", provider, "-", err)
 		}
-
 		// 認証が成功するとユーザー情報にアクセスするための認証情報が取得できる
-		log.Println("provider:", provider.Name())
-		log.Println("URL:", r.URL.RawQuery)
 		creds, err := provider.CompleteAuth(objx.MustFromURLQuery(r.URL.RawQuery))
 		if err != nil {
 			log.Fatalln("認証を完了できませんでした:", provider, "-", err)

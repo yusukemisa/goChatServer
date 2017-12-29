@@ -11,6 +11,8 @@ import (
 	"sync"
 	"text/template"
 
+	"github.com/stretchr/objx"
+
 	gom "github.com/stretchr/gomniauth"
 	"github.com/stretchr/gomniauth/providers/facebook"
 	"github.com/stretchr/gomniauth/providers/github"
@@ -43,8 +45,14 @@ func (t *templateHandler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		t.templ = template.Must(template.ParseFiles(filepath.Join("templates",
 			t.filename)))
 	})
+	data := map[string]interface{}{
+		"Host": r.Host,
+	}
+	if authCookie, err := r.Cookie("auth"); err == nil {
+		data["UserData"] = objx.MustFromBase64(authCookie.Value)
+	}
 	//log.Println(r.Host, r.Header)
-	if err := t.templ.Execute(w, r); err != nil {
+	if err := t.templ.Execute(w, data); err != nil {
 		log.Fatal("ServeHTTP:", err)
 	}
 }
